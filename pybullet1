@@ -1,0 +1,74 @@
+import pybullet as p
+import time
+import pybullet_data
+
+p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS, 0)
+p.setAdditionalSearchPath(pybullet_data.getDataPath())
+p.setGravity(0, 0, -50)
+
+plane = p.loadURDF("plane.urdf")
+robot = p.loadURDF("r2d2.urdf", [0, 0, 1])
+robot2 = p.loadURDF("r2d2.urdf", [1, 1, 1])
+
+for i in range(p.getNumJoints(robot)):
+    info = p.getJointInfo(robot, i)
+    print(
+        i,
+        info[1].decode("utf-8"),
+        "min:", info[8],
+        "max:", info[9]
+    )
+
+
+
+
+while True:
+    keys = p.getKeyboardEvents()
+
+    vx = 0
+    vy = 0
+    speed = 0.4
+
+    vx2 = 0
+    vy2 = 0
+    speed2 = 0.4
+
+    if p.B3G_LEFT_ARROW in keys:
+        vx2 = speed2
+    if p.B3G_RIGHT_ARROW in keys:
+        vx2 = -speed2
+    if p.B3G_UP_ARROW in keys:
+        vy2 = speed2
+    if p.B3G_DOWN_ARROW in keys:
+        vy2 = -speed2
+
+    p.resetBaseVelocity(robot, linearVelocity=[vx2, vy2, 0])
+
+    if ord('w') in keys:
+        vy = speed
+    if ord('s') in keys:
+        vy = -speed
+    if ord('a') in keys:
+        vx = -speed
+    if ord('d') in keys:
+        vx = speed
+
+    p.resetBaseVelocity(robot2, linearVelocity=[vx, vy, 0])
+
+    if ord('o') in keys :
+        p.setJointMotorControl2(robot, 8, p.POSITION_CONTROL, targetPosition=-0.3)
+
+    if ord('p') in keys :
+        p.setJointMotorControl2(robot, 8, p.POSITION_CONTROL, targetPosition=0.0)
+
+    if ord('k') in keys :
+        p.setJointMotorControl2(robot, 9, p.POSITION_CONTROL, targetPosition=0.5)
+        p.setJointMotorControl2(robot, 11, p.POSITION_CONTROL, targetPosition=0.5)
+
+    if ord('l') in keys :
+        p.setJointMotorControl2(robot, 9, p.POSITION_CONTROL, targetPosition=0.0)
+        p.setJointMotorControl2(robot, 11, p.POSITION_CONTROL, targetPosition=0.0)
+
+    p.stepSimulation()
+    time.sleep(1/240)
